@@ -1758,6 +1758,7 @@
     <string name="title_create_missing_filtered">Create missing filtered</string>
     <string name="summary_widget_hide_graph">Hide the graph on widgets (shows on next reading)</string>
     <string name="title_widget_hide_graph">Hide widget graph</string>
+    <string name="title_floating_widget">Floating widget</string>
     <string name="summary_illustrate_remote_data">Show data received remotely (diagnostic only)</string>
     <string name="title_illustrate_remote_data">Illustrate remote data</string>
     <string name="summary_show_accessibility_settings">If your phone has Always On Display you can enable the xDrip widget there by enabling the xDrip accessibility service from the Android System Settings page.</string>

@@ -7,7 +7,9 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.RemoteViews;
+import android.widget.TextView;
 
 import com.eveningoutpost.dexdrip.BestGlucose;
 import com.eveningoutpost.dexdrip.Home;
@@ -24,6 +26,62 @@ import java.util.List;
 public class WidgetDisplayHelper {
 
     private static final boolean use_best_glucose = true;
+
+    private interface ViewInterface {
+        void setTextViewText(int viewId, CharSequence text);
+        void setTextColor(int viewId, int color);
+        void setViewVisibility(int viewId, int visibility);
+        void setImageViewBitmap(int viewId, android.graphics.Bitmap bitmap);
+        void setInt(int viewId, String methodName, int value);
+        void setFloat(int viewId, String methodName, float value);
+    }
+
+    private static class RemoteViewsWrapper implements ViewInterface {
+        private final RemoteViews views;
+        RemoteViewsWrapper(RemoteViews views) { this.views = views; }
+        @Override public void setTextViewText(int viewId, CharSequence text) { views.setTextViewText(viewId, text); }
+        @Override public void setTextColor(int viewId, int color) { views.setTextColor(viewId, color); }
+        @Override public void setViewVisibility(int viewId, int visibility) { views.setViewVisibility(viewId, visibility); }
+        @Override public void setImageViewBitmap(int viewId, android.graphics.Bitmap bitmap) { views.setImageViewBitmap(viewId, bitmap); }
+        @Override public void setInt(int viewId, String methodName, int value) { views.setInt(viewId, methodName, value); }
+        @Override public void setFloat(int viewId, String methodName, float value) { views.setFloat(viewId, methodName, value); }
+    }
+
+    private static class RegularViewWrapper implements ViewInterface {
+        private final View root;
+        RegularViewWrapper(View root) { this.root = root; }
+        @Override public void setTextViewText(int viewId, CharSequence text) {
+            View v = root.findViewById(viewId);
+            if (v instanceof TextView) ((TextView) v).setText(text);
+        }
+        @Override public void setTextColor(int viewId, int color) {
+            View v = root.findViewById(viewId);
+            if (v instanceof TextView) ((TextView) v).setTextColor(color);
+        }
+        @Override public void setViewVisibility(int viewId, int visibility) {
+            View v = root.findViewById(viewId);
+            if (v != null) v.setVisibility(visibility);
+        }
+        @Override public void setImageViewBitmap(int viewId, android.graphics.Bitmap bitmap) {
+            View v = root.findViewById(viewId);
+            if (v instanceof ImageView) ((ImageView) v).setImageBitmap(bitmap);
+        }
+        @Override public void setInt(int viewId, String methodName, int value) {
+            View v = root.findViewById(viewId);
+            if (v == null) return;
+            if ("setBackgroundColor".equals(methodName)) {
+                v.setBackgroundColor(value);
+            } else if ("setPaintFlags".equals(methodName)) {
+                if (v instanceof TextView) ((TextView) v).setPaintFlags(value);
+            }
+        }
+        @Override public void setFloat(int viewId, String methodName, float value) {
+            View v = root.findViewById(viewId);
+            if (v instanceof TextView && "setTextSize".equals(methodName)) {
+                ((TextView) v).setTextSize(value);
+            }
+        }
+    }
 
     /**
      * Updates common widget display elements (BG, arrow, delta, age, graph, colors).
@@ -47,6 +105,28 @@ public class WidgetDisplayHelper {
             int maxWidth,
             int maxHeight,
             Integer maxGraphHeight) {
+        updateCommonWidgetElementsInternal(new RemoteViewsWrapper(views), appWidgetManager, appWidgetId, context, widgetRootViewId, maxWidth, maxHeight, maxGraphHeight);
+    }
+
+    public static void updateCommonWidgetElements(
+            View root,
+            Context context,
+            int widgetRootViewId,
+            int maxWidth,
+            int maxHeight,
+            Integer maxGraphHeight) {
+        updateCommonWidgetElementsInternal(new RegularViewWrapper(root), null, -1, context, widgetRootViewId, maxWidth, maxHeight, maxGraphHeight);
+    }
+
+    private static void updateCommonWidgetElementsInternal(
+            ViewInterface views,
+            AppWidgetManager appWidgetManager,
+            int appWidgetId,
+            Context context,
+            int widgetRootViewId,
+            int maxWidth,
+            int maxHeight,
+            Integer maxGraphHeight) {
 
         BgGraphBuilder bgGraphBuilder = new BgGraphBuilder(context);
         BgReading lastBgReading = BgReading.lastNoSenssor();
@@ -59,12 +139,17 @@ public class WidgetDisplayHelper {
             double estimate;
             double estimated_delta = -9999;
             try {
-                int height = maxHeight == -1
-                        ? appWidgetManager.getAppWidgetOptions(appWidgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
-                        : maxHeight;
-                int width = maxWidth == -1
-                        ? appWidgetManager.getAppWidgetOptions(appWidgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH)
-                        : maxWidth;
+                int height = maxHeight;
+                int width = maxWidth;
+
+                if (appWidgetManager != null && appWidgetId != -1) {
+                    if (height == -1) height = appWidgetManager.getAppWidgetOptions(appWidgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT);
+                    if (width == -1) width = appWidgetManager.getAppWidgetOptions(appWidgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH);
+                }
+
+                // Fallbacks for regular view if not provided
+                if (height <= 0) height = 100;
+                if (width <= 0) width = 100;
 
                 int graphHeight = height;
                 if (maxGraphHeight != null) {

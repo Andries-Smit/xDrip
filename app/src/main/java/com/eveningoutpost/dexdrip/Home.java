@@ -93,6 +93,7 @@ import com.eveningoutpost.dexdrip.models.StepCounter;
 import com.eveningoutpost.dexdrip.models.Treatments;
 import com.eveningoutpost.dexdrip.models.UserError;
 import com.eveningoutpost.dexdrip.services.ActivityRecognizedService;
+import com.eveningoutpost.dexdrip.services.FloatingViewService;
 import com.eveningoutpost.dexdrip.services.DexCollectionService;
 import com.eveningoutpost.dexdrip.services.Ob1G5CollectionService;
 import com.eveningoutpost.dexdrip.services.PlusSyncService;
@@ -3509,6 +3510,22 @@ public class Home extends ActivityWithMenu implements ActivityCompat.OnRequestPe
 
     public void resetWearDb(MenuItem myitem) {
         startService(new Intent(this, WatchUpdaterService.class).setAction(WatchUpdaterService.ACTION_RESET_DB));
+    }
+
+    public void toggleFloatingWidget(MenuItem myitem) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
+            return;
+        }
+        final boolean nowEnabled = !Pref.getBooleanDefaultFalse("show_floating_widget");
+        Pref.setBoolean("show_floating_widget", nowEnabled);
+        if (nowEnabled) {
+            startService(new Intent(this, FloatingViewService.class));
+        } else {
+            stopService(new Intent(this, FloatingViewService.class));
+        }
     }
 
     public void undoButtonClick(View myitem) {
