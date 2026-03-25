@@ -38,6 +38,7 @@ import com.eveningoutpost.dexdrip.models.Calibration;
 import com.eveningoutpost.dexdrip.models.CalibrationRequest;
 import com.eveningoutpost.dexdrip.models.JoH;
 import com.eveningoutpost.dexdrip.models.Sensor;
+import com.eveningoutpost.dexdrip.models.TimerUtil;
 import com.eveningoutpost.dexdrip.models.UserError;
 import com.eveningoutpost.dexdrip.models.UserError.Log;
 import com.eveningoutpost.dexdrip.models.UserNotification;
@@ -1079,6 +1080,7 @@ public class Notifications extends IntentService {
                     && Pref.getBooleanDefaultFalse("pref_amazfit_other_alert_enable_key")) {
                 Amazfitservice.start("xDrip_Otheralert", message, 30);
             }
+            TimerUtil.scheduleReminder(context, 1, message);
 
             BroadcastEntry.sendAlert(type, message);
         }

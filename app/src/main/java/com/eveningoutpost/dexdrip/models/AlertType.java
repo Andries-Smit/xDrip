@@ -115,8 +115,12 @@ public class AlertType extends Model {
     public final static String LOW_ALERT_55 = "c5f1999c-4ec5-449e-adad-3980b172b920";
     private final static String TAG = Notifications.class.getSimpleName();
     private final static String TAG_ALERT = "AlertBg";
+    private final static String TEST_BG = "TEST";
     private static boolean patched = false;
 
+    public static boolean isTestBG(String bgValue) {
+        return bgValue.equals(TEST_BG);
+    }
     // This shouldn't be needed but it seems it is
     public static void fixUpTable() {
         if (patched) return;

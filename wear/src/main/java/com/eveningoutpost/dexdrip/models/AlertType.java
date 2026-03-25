@@ -109,7 +109,12 @@ public class AlertType extends Model {
     public final static String LOW_ALERT_55 = "c5f1999c-4ec5-449e-adad-3980b172b920";
     private final static String TAG = Notifications.class.getSimpleName();
     private final static String TAG_ALERT = "AlertBg";
+    private final static String TEST_BG = "TEST";
     private static boolean patched = false;
+
+    public static boolean isTestBG(String bgValue) {
+        return bgValue.equals(TEST_BG);
+    }
 
     // This shouldn't be needed but it seems it is
     private static void fixUpTable() {
@@ -578,7 +583,7 @@ public class AlertType extends Model {
             at.override_silent_mode = override_silent_mode;
             at.default_snooze = snooze;
             at.vibrate = vibrate;
-            AlertPlayer.getPlayer().startAlert(context, false, at, "TEST", false);
+            AlertPlayer.getPlayer().startAlert(context, false, at, TEST_BG, false);
     }
 
     // Time is calculated in minutes. that is 01:20 means 80 minutes.

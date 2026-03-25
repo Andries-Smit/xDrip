@@ -38,4 +38,11 @@ public class BroadcastEntry {
                     "type", type));
         }
     }
+
+    public static void sendSnooze(int repeatTime) {
+        if (isEnabled()) {
+            Inevitable.task("broadcast-service-send-command", 100, () -> JoH.startService(BroadcastService.class,
+                Const.INTENT_FUNCTION_KEY, Const.CMD_SNOOZE_ALERT));
+        }
+    }
 }

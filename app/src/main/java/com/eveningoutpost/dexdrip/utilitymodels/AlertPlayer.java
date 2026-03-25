@@ -26,6 +26,7 @@ import com.eveningoutpost.dexdrip.Home;
 import com.eveningoutpost.dexdrip.models.ActiveBgAlert;
 import com.eveningoutpost.dexdrip.models.AlertType;
 import com.eveningoutpost.dexdrip.models.JoH;
+import com.eveningoutpost.dexdrip.models.TimerUtil;
 import com.eveningoutpost.dexdrip.models.UserError;
 import com.eveningoutpost.dexdrip.models.UserError.Log;
 import com.eveningoutpost.dexdrip.R;
@@ -248,7 +249,7 @@ public class AlertPlayer {
             Amazfitservice.start("xDrip_AlarmCancel");
         }
 
-        BroadcastEntry.cancelAlert();
+        BroadcastEntry.sendSnooze(repeatTime);
         ping("alarm");
     }
 
@@ -602,7 +603,9 @@ public class AlertPlayer {
 
         // send to bluejay
         BlueJayEntry.sendAlertIfEnabled((alert.above ? "High" : "Low") + " Alert " + bgValue + " " + alert.name); // string text is used to determine alert type
-
+        
+        // Send timer alert
+        TimerUtil.scheduleReminder(context, 1, highlow + " " + bgValue);
         // send alert to pebble
         if (Pref.getBooleanDefaultFalse("broadcast_to_pebble") && (Pref.getBooleanDefaultFalse("pebble_vibe_alerts"))) {
             if (JoH.ratelimit("pebble_vibe_start", 59)) {
@@ -616,15 +619,15 @@ public class AlertPlayer {
             Amazfitservice.start("xDrip_Alarm", alert.name, alert.default_snooze);
         }
 
-        if (LeFunEntry.areAlertsEnabled() && ActiveBgAlert.currentlyAlerting()) {
+        if (MiBandEntry.areAlertsEnabled() && ActiveBgAlert.currentlyAlerting(bgValue)) {
             LeFun.sendAlert(highlow, bgValue);
         }
 
-        if (MiBandEntry.areAlertsEnabled() && ActiveBgAlert.currentlyAlerting()) {
+        if (MiBandEntry.areAlertsEnabled() && ActiveBgAlert.currentlyAlerting(bgValue)) {
             MiBand.sendAlert(alert.name, highlow + " " + bgValue, alert.default_snooze);
         }
 
-        if (ActiveBgAlert.currentlyAlerting()) {
+        if (ActiveBgAlert.currentlyAlerting(bgValue)) {
             BroadcastEntry.sendAlert(Const.BG_ALERT_TYPE, highlow + " " + bgValue);
         }
 

@@ -302,7 +302,8 @@ public class BroadcastService extends Service {
                     bundle.putString("message", intent.getStringExtra("message"));
                     sendBroadcast(function, receiver, bundle);
                     break;
-                case Const.CMD_CANCEL_ALERT:
+                case Const.CMD_SNOOZE_ALERT:
+                    bundle = new Bundle();
                     sendBroadcast(function, receiver, bundle);
                     break;
             }
@@ -356,6 +357,8 @@ public class BroadcastService extends Service {
                             nextAlertAt = activeBgAlert.next_alert_at;
                         }
                     } else {
+                        // Snooze anything for testing
+                        AlertPlayer.getPlayer().Snooze(xdrip.getAppContext(), -1, true);
                         replyMsg = "Error: No Alarms found to snooze";
                         replyCode = Const.INTENT_REPLY_CODE_ERROR;
                     }

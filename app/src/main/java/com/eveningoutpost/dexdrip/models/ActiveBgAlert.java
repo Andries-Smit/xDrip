@@ -53,6 +53,11 @@ public class ActiveBgAlert extends Model {
         return activeBgAlert != null && !activeBgAlert.is_snoozed;
     }
 
+    public static boolean currentlyAlerting(String bgValue) {
+        final ActiveBgAlert activeBgAlert = getOnly();
+        return activeBgAlert != null && !activeBgAlert.is_snoozed || AlertType.isTestBG(bgValue);
+    }
+
     public static boolean alertSnoozeOver() {
         ActiveBgAlert activeBgAlert = getOnly();
         if (activeBgAlert == null) {
