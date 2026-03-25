@@ -103,6 +103,12 @@
         android:onClick="resetWearDb"
         android:showAsAction="never" />
 
+    <item android:id="@+id/action_floating_widget"
+        android:orderInCategory="100"
+        android:title="@string/title_floating_widget"
+        android:onClick="toggleFloatingWidget"
+        android:showAsAction="never" />
+
     <item android:id="@+id/deleteAllBG"
         android:title="@string/delete_all_bg_readings"
         android:checkable="false"
