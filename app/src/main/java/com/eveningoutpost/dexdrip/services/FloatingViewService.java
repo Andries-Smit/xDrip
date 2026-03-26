@@ -20,7 +20,7 @@ import com.eveningoutpost.dexdrip.Home;
 import com.eveningoutpost.dexdrip.R;
 import com.eveningoutpost.dexdrip.utilitymodels.Intents;
 import com.eveningoutpost.dexdrip.utilitymodels.Pref;
-import com.eveningoutpost.dexdrip.utilitymodels.WidgetDisplayHelper;
+import com.eveningoutpost.dexdrip.xDripWidgetFloat;
 
 public class FloatingViewService extends Service {
 
@@ -45,7 +45,7 @@ public class FloatingViewService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        mFloatingView = LayoutInflater.from(this).inflate(R.layout.floating_widget, null);
+        mFloatingView = LayoutInflater.from(this).inflate(R.layout.x_drip_widget_float, null);
 
         int layoutType;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -131,20 +131,17 @@ public class FloatingViewService extends Service {
             }
         });
 
-        registerReceiver(newDataReceiver, new IntentFilter(Intents.ACTION_NEW_BG_ESTIMATE_NO_DATA));
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(Intents.ACTION_NEW_BG_ESTIMATE);
+        filter.addAction(Intents.ACTION_NEW_BG_ESTIMATE_NO_DATA);
+        filter.addAction(Intent.ACTION_TIME_TICK);
+        registerReceiver(newDataReceiver, filter);
         updateWidgetData();
     }
 
     private void updateWidgetData() {
         if (mFloatingView != null) {
-            WidgetDisplayHelper.updateCommonWidgetElements(
-                    mFloatingView,
-                    getApplicationContext(),
-                    R.id.xDripwidget,
-                    200, // Reasonable defaults or from Prefs?
-                    200,
-                    null
-            );
+            xDripWidgetFloat.update(mFloatingView, getApplicationContext());
         }
     }
 
