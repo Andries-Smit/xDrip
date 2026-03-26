@@ -71,7 +71,7 @@ public class HeadsetStateReceiver extends BroadcastReceiver {
     private static final long NOISE_DELAY = 10000; // allow time for bt volume control
 
     private static void processDevice(final String mac, final boolean connected) {
-        if (VehicleMode.isEnabled() && VehicleMode.viaCarAudio() && SelectAudioDevice.getAudioMac().equals(mac)) {
+        if (VehicleMode.isEnabled() && VehicleMode.viaCarAudio() && SelectAudioDevice.getAudioMacs().contains(mac)) {
             VehicleMode.setVehicleModeActive(connected);
             UserError.Log.ueh(TAG, "Vehicle mode: " + (connected ? "Enabled" : "Disabled"));
             if (connected) {
