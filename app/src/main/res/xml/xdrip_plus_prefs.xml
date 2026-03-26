@@ -1129,6 +1129,12 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:dependency="vehicle_mode_enabled"
+            android:key="vehicle_mode_floating_widget"
+            android:summary="@string/vehicle_mode_floating_widget_summary"
+            android:title="@string/vehicle_mode_floating_widget_title" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="vehicle_mode_enabled"
             android:key="raise_low_limit_in_vehicle_mode"
             android:summary="@string/increase_low_alarms_vehicle_mode"
             android:title="@string/raise_low_threshold" />
