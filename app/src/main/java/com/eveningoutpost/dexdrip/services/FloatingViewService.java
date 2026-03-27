@@ -15,12 +15,16 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.eveningoutpost.dexdrip.Home;
 import com.eveningoutpost.dexdrip.R;
+import com.eveningoutpost.dexdrip.models.BgReading;
 import com.eveningoutpost.dexdrip.utilitymodels.Intents;
 import com.eveningoutpost.dexdrip.utilitymodels.Pref;
-import com.eveningoutpost.dexdrip.xDripWidgetFloat;
+import com.eveningoutpost.dexdrip.utilitymodels.WidgetDisplayHelper;
+
+import java.util.Date;
 
 public class FloatingViewService extends Service {
 
@@ -78,11 +82,12 @@ public class FloatingViewService extends Service {
         final ImageView closeButton = mFloatingView.findViewById(R.id.close_floating_view);
 
         root.setOnTouchListener(new View.OnTouchListener() {
-            private int lastAction;
+            private static final int CLICK_THRESHOLD_DP = 5;
             private int initialX;
             private int initialY;
             private float initialTouchX;
             private float initialTouchY;
+            private boolean isDragging;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -92,11 +97,28 @@ public class FloatingViewService extends Service {
                         initialY = params.y;
                         initialTouchX = event.getRawX();
                         initialTouchY = event.getRawY();
-                        lastAction = event.getAction();
+                        isDragging = false;
+                        return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        final float dx = event.getRawX() - initialTouchX;
+                        final float dy = event.getRawY() - initialTouchY;
+                        final float density = v.getContext().getResources().getDisplayMetrics().density;
+                        if (!isDragging && Math.hypot(dx, dy) < CLICK_THRESHOLD_DP * density) {
+                            return true; // within tap slop — don't move widget yet
+                        }
+                        isDragging = true;
+                        params.x = initialX + (int) dx;
+                        params.y = initialY + (int) dy;
+                        try {
+                            mWindowManager.updateViewLayout(mFloatingView, params);
+                        } catch (Exception e) {
+                            // ignore
+                        }
                         return true;
 
                     case MotionEvent.ACTION_UP:
-                        if (lastAction == MotionEvent.ACTION_DOWN) {
+                        if (!isDragging) {
                             Intent intent = new Intent(FloatingViewService.this, Home.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
@@ -104,18 +126,6 @@ public class FloatingViewService extends Service {
                             Pref.setInt("floating_widget_x", params.x);
                             Pref.setInt("floating_widget_y", params.y);
                         }
-                        lastAction = event.getAction();
-                        return true;
-
-                    case MotionEvent.ACTION_MOVE:
-                        params.x = initialX + (int) (event.getRawX() - initialTouchX);
-                        params.y = initialY + (int) (event.getRawY() - initialTouchY);
-                        try {
-                            mWindowManager.updateViewLayout(mFloatingView, params);
-                        } catch (Exception e) {
-                            // ignore
-                        }
-                        lastAction = event.getAction();
                         return true;
                 }
                 return false;
@@ -140,8 +150,41 @@ public class FloatingViewService extends Service {
     }
 
     private void updateWidgetData() {
-        if (mFloatingView != null) {
-            xDripWidgetFloat.update(mFloatingView, getApplicationContext());
+        if (mFloatingView == null) return;
+        WidgetDisplayHelper.updateCommonWidgetElements(
+                mFloatingView, getApplicationContext(), R.id.xDripwidget, 0, 0, null);
+        postProcessFloatingWidget(mFloatingView);
+    }
+
+    /**
+     * Post-processes the floating widget view after common widget update:
+     *   - BG text size scaled to 80% of standard widget sizes (55sp→44sp, 45sp→36sp)
+     *   - Reading age shown as "6'" instead of "6 minutes ago"
+     *   - Delta shown without unit suffix ("+0.3 mmol" → "+0.3")
+     */
+    private void postProcessFloatingWidget(View root) {
+        final BgReading lastBg = BgReading.lastNoSenssor();
+        if (lastBg == null) return;
+
+        final TextView bgView = root.findViewById(R.id.widgetBg);
+        if (bgView != null) {
+            bgView.setTextSize(bgView.getText().length() > 3 ? 34f : 40f);
+        }
+
+        final TextView ageView = root.findViewById(R.id.readingAge);
+        if (ageView != null) {
+            final int timeAgo = (int) Math.floor(
+                    (new Date().getTime() - lastBg.timestamp) / 60000.0);
+            ageView.setText(timeAgo + "'");
+        }
+
+        final TextView deltaView = root.findViewById(R.id.widgetDelta);
+        if (deltaView != null) {
+            final String delta = deltaView.getText().toString();
+            final int spaceIdx = delta.indexOf(' ');
+            if (spaceIdx > 0) {
+                deltaView.setText(delta.substring(0, spaceIdx));
+            }
         }
     }
 
