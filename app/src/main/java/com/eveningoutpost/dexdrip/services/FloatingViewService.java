@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.graphics.Color;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -132,7 +133,6 @@ public class FloatingViewService extends Service {
             }
         });
 
-        closeButton.setVisibility(View.VISIBLE);
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -158,8 +158,8 @@ public class FloatingViewService extends Service {
 
     /**
      * Post-processes the floating widget view after common widget update:
-     *   - BG text size scaled to 80% of standard widget sizes (55sp→44sp, 45sp→36sp)
-     *   - Reading age shown as "6'" instead of "6 minutes ago"
+     *   - BG text dynamic sizeing
+     *   - Reading age shown as "6'" instead of "6 minutes ago", colored by staleness
      *   - Delta shown without unit suffix ("+0.3 mmol" → "+0.3")
      */
     private void postProcessFloatingWidget(View root) {
@@ -176,6 +176,10 @@ public class FloatingViewService extends Service {
             final int timeAgo = (int) Math.floor(
                     (new Date().getTime() - lastBg.timestamp) / 60000.0);
             ageView.setText(timeAgo + "'");
+            ageView.setTextColor(
+                    timeAgo > 30 ? Color.parseColor("#ff333d")
+                    : timeAgo > 15 ? Color.parseColor("#FFBB33")
+                    : Color.WHITE);
         }
 
         final TextView deltaView = root.findViewById(R.id.widgetDelta);
