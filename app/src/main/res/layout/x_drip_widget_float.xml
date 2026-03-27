@@ -11,28 +11,26 @@
         android:clipToOutline="true"
         android:gravity="center_vertical"
         android:orientation="horizontal"
+        android:paddingEnd="10dp"
+        android:paddingStart="14dp">
 
-        android:paddingBottom="6dp"
-        android:paddingEnd="14dp"
-        android:paddingStart="14dp"
-        android:paddingTop="6dp">
-
-        <!-- Left section: current Blood Glucose value -->
         <TextView
             android:id="@+id/widgetBg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
+            android:layout_marginTop="-10dp"
+            android:layout_marginBottom="-8dp"
             android:text="---"
             android:textColor="#ffffff"
             android:textSize="40sp" />
 
-        <!-- Right section: delta without units, arrow, time ago in 6' format -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="10dp"
+            android:layout_marginEnd="2dp"
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
@@ -41,7 +39,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:layout_marginBottom="-10dp"
+                android:layout_gravity="start"
                 android:text="--"
                 android:textColor="#ffffff"
                 android:textSize="8sp" />
@@ -50,6 +48,8 @@
                 android:id="@+id/widgetArrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="-2dp"
+                android:layout_marginTop="-9dp"
                 android:text="--"
                 android:textColor="#ffffff"
                 android:textSize="30sp" />
@@ -58,6 +58,7 @@
                 android:id="@+id/readingAge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="start"
                 android:layout_marginBottom="4dp"
                 android:text="--'"
                 android:textColor="#ffffff"
@@ -72,7 +73,8 @@
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_gravity="top|end"
-        android:src="@android:drawable/ic_menu_close_clear_cancel"
-        android:visibility="gone" />
+        android:layout_marginTop="-3dp"
+        android:layout_marginEnd="-3dp"
+        android:src="@android:drawable/ic_menu_close_clear_cancel" />
 
 </FrameLayout>
