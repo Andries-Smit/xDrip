@@ -23,6 +23,7 @@ import com.eveningoutpost.dexdrip.R;
 import com.eveningoutpost.dexdrip.models.BgReading;
 import com.eveningoutpost.dexdrip.utilitymodels.Intents;
 import com.eveningoutpost.dexdrip.utilitymodels.Pref;
+import com.eveningoutpost.dexdrip.utilitymodels.BgGraphBuilder;
 import com.eveningoutpost.dexdrip.utilitymodels.WidgetDisplayHelper;
 
 import java.util.Date;
@@ -200,6 +201,20 @@ public class FloatingViewService extends Service {
                     deltaView.setText(delta.substring(0, spaceIdx));
                 }
                 deltaView.setVisibility(View.VISIBLE);
+            }
+        }
+
+        final TextView lowPredView = root.findViewById(R.id.widgetLowPrediction);
+        if (lowPredView != null) {
+            final double lowOccursAt = BgGraphBuilder.low_occurs_at;
+            final double minutesUntilLow = (lowOccursAt - System.currentTimeMillis()) / 60000.0;
+            if (lowOccursAt > 0
+                    && minutesUntilLow > 1
+                    && BgGraphBuilder.last_noise < BgGraphBuilder.NOISE_TOO_HIGH_FOR_PREDICT) {
+                lowPredView.setText(getString(R.string.widget_low_prediction, (int) minutesUntilLow));
+                lowPredView.setVisibility(View.VISIBLE);
+            } else {
+                lowPredView.setVisibility(View.GONE);
             }
         }
     }

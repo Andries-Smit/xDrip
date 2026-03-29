@@ -1063,6 +1063,7 @@
     <string name="learn_current_car_audio">Select car audio</string>
     <string name="detect_car_audio">Detect car audio</string>
     <string name="automatically_enable_when_connected_to_car_bluetooth">Automatically enable vehicle mode when connected to car Bluetooth</string>
+    <string name="widget_low_prediction">Low ~%d\'</string>
     <string name="vehicle_mode_floating_widget_title">Open floating widget</string>
     <string name="vehicle_mode_floating_widget_summary">Show floating glucose widget when vehicle mode is active</string>
     <string name="enable_speak_readings_when_in_vehicle">Enable speak readings feature when in vehicle mode</string>
