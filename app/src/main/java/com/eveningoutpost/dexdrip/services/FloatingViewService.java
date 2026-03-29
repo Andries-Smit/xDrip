@@ -158,9 +158,10 @@ public class FloatingViewService extends Service {
 
     /**
      * Post-processes the floating widget view after common widget update:
-     *   - BG text dynamic sizeing
-     *   - Reading age shown as "6'" instead of "6 minutes ago", colored by staleness
-     *   - Delta shown without unit suffix ("+0.3 mmol" → "+0.3")
+     *  - BG text dynamic size
+     *  - Shorten reading age shown as "6'"
+     *  - Shorten delta shown without unit suffix "+0.3"
+     *  - Only show age and delta when relevant.
      */
     private void postProcessFloatingWidget(View root) {
         final BgReading lastBg = BgReading.lastNoSenssor();
@@ -175,19 +176,30 @@ public class FloatingViewService extends Service {
         if (ageView != null) {
             final int timeAgo = (int) Math.floor(
                     (new Date().getTime() - lastBg.timestamp) / 60000.0);
-            ageView.setText(timeAgo + "'");
-            ageView.setTextColor(
-                    timeAgo > 30 ? Color.parseColor("#ff333d")
-                    : timeAgo > 15 ? Color.parseColor("#FFBB33")
-                    : Color.WHITE);
+            if (timeAgo < 6) {
+                ageView.setVisibility(View.INVISIBLE);
+            } else {
+                ageView.setVisibility(View.VISIBLE);
+                ageView.setText(timeAgo + "'");
+                ageView.setTextColor(
+                        timeAgo > 30 ? Color.parseColor("#ff333d")
+                        : timeAgo > 15 ? Color.parseColor("#FFBB33")
+                        : Color.WHITE);
+            }
         }
 
         final TextView deltaView = root.findViewById(R.id.widgetDelta);
         if (deltaView != null) {
-            final String delta = deltaView.getText().toString();
-            final int spaceIdx = delta.indexOf(' ');
-            if (spaceIdx > 0) {
-                deltaView.setText(delta.substring(0, spaceIdx));
+            final String slopeName = lastBg.slopeName();
+            if (slopeName.equals("FortyFiveDown") || slopeName.equals("Flat") || slopeName.equals("FortyFiveUp")) {
+                deltaView.setVisibility(View.INVISIBLE);
+            } else {
+                final String delta = deltaView.getText().toString();
+                final int spaceIdx = delta.indexOf(' ');
+                if (spaceIdx > 0) {
+                    deltaView.setText(delta.substring(0, spaceIdx));
+                }
+                deltaView.setVisibility(View.VISIBLE);
             }
         }
     }

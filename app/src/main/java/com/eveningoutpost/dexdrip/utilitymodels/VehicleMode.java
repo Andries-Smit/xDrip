@@ -61,6 +61,16 @@ public class VehicleMode {
         }
     }
 
+    public static void onFloatingWidgetPrefChanged(final boolean enabled) {
+        if (enabled) {
+            if (isVehicleModeActive()) {
+                startFloatingWidget();
+            }
+        } else {
+            stopFloatingWidget();
+        }
+    }
+
     private static void startFloatingWidget() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                 && !Settings.canDrawOverlays(xdrip.getAppContext())) {

@@ -25,6 +25,7 @@ import com.eveningoutpost.dexdrip.R;
 import com.eveningoutpost.dexdrip.utilitymodels.Pref;
 import com.eveningoutpost.dexdrip.utilitymodels.ShotStateStore;
 import com.eveningoutpost.dexdrip.utilitymodels.VehicleMode;
+import com.eveningoutpost.dexdrip.utils.HeadsetStateReceiver;
 import com.eveningoutpost.dexdrip.utils.PowerStateReceiver;
 import com.eveningoutpost.dexdrip.xdrip;
 import com.google.android.gms.common.ConnectionResult;
@@ -695,6 +696,23 @@ public class ActivityRecognizedService extends IntentService implements GoogleAp
 
                     }
                     reStartActivityRecogniser(xdrip.getAppContext());
+                    break;
+                case "vehicle_mode_floating_widget":
+                    VehicleMode.onFloatingWidgetPrefChanged(
+                            prefs.getBoolean("vehicle_mode_floating_widget", false));
+                    break;
+                case "vehicle_mode_via_car_audio":
+                    if (prefs.getBoolean("vehicle_mode_via_car_audio", false)) {
+                        HeadsetStateReceiver.checkAndActivateForConfiguredDevices();
+                    } else {
+                        VehicleMode.setVehicleModeActive(false);
+                    }
+                    break;
+                case "vehicle_mode_enabled":
+                    if (prefs.getBoolean("vehicle_mode_enabled", false)
+                            && VehicleMode.viaCarAudio()) {
+                        HeadsetStateReceiver.checkAndActivateForConfiguredDevices();
+                    }
                     break;
             }
 

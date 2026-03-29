@@ -91,7 +91,6 @@ public class HeadsetStateReceiver extends BroadcastReceiver {
         }
     }
 
-
     public static String getLastConnectedMac() {
         return PersistentStore.getString(PREF_LAST_CONNECTED_MAC);
     }
@@ -105,6 +104,12 @@ public class HeadsetStateReceiver extends BroadcastReceiver {
     public static void reprocessConnectionIfAlreadyConnected(final String mac) {
         VehicleMode.setVehicleModeActive(false);
         areWeConnectedToMac(mac, () -> processDevice(mac, true));
+    }
+
+    public static void checkAndActivateForConfiguredDevices() {
+        for (final String mac : SelectAudioDevice.getAudioMacs()) {
+            areWeConnectedToMac(mac, () -> processDevice(mac, true));
+        }
     }
 
     // if connected run the runnable, proxy service object may mean async running
